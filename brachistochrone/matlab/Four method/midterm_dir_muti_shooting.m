@@ -34,11 +34,11 @@ Aeq     = [];
 Beq     = [];
 
 option = optimset('Display','Iter','TolX',1e-8);
-z      = fmincon(@Obj_Orbital,zguess,A,B,Aeq,Beq,zmin,zmax,@Error_Orbital,option,u,T,ve,K,n,nx,tau,t0)
+z      = fmincon(@Obj_Orbital,zguess,A,B,Aeq,Beq,zmin,zmax,@Error_Orbital,option,u,T,ve,K,n,nx,tau,t0);
 toc
 disp(['runtime: ',num2str(toc)]); % display computation time
 
-[Eineq,Eeq,t,p] = Error_Orbital(z,u,T,ve,K,n,nx,tau,t0)
+[Eineq,Eeq,t,p] = Error_Orbital(z,u,T,ve,K,n,nx,tau,t0);
 % plot
 figure(1);
 plot(t,p(:,1),'r*-');
@@ -52,21 +52,34 @@ hold on;
 plot(t,p(:,5),'k+-');
 grid on;
 legend('r','theta','vr','vtheta','m');
-title('states(t)');
+title('states(t) K=16');
 
 % plot trajectory
 figure(2);
 polarplot(p(:,2),p(:,1),'r');
-title('trajectory');
+title('trajectory K=16');
 hold on;
+
 % plot control 
-c    = z(1:end-1);
-beta = polyval(c,t);
+c    = z(1:K*(n+1));
+c    = reshape(c,n+1,K);
+ti   = [-1];
+j    = 1;
 figure(3);
-plot(t,beta,'ro-');
-title('beta(t)');
-legend('control angle');
-grid on;
+for k = 1:K
+    tau(k+1)
+    while ti(end)<tau(k+1)
+        ti = [ti,t(j)];
+        j  = j+1;
+    end
+    beta = polyval(c(:,k),ti);
+    plot(ti,beta,'ro-');
+    hold on;
+    ti = t(j);
+    title('beta(t) K=16');
+    grid on;
+end
+
 end
 
 %% Error Function 
